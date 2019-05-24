@@ -28,7 +28,23 @@ oc new-build -D $'FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11\
   -n ${GUID}-jenkins
 
 # Create pipeline build config pointing to the ${REPO} with contextDir `openshift-tasks`
-oc create -f tasks-pipeline.yaml
+echo "apiVersion: v1
+items:
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: tasks-pipeline
+  spec:
+    source:
+      type: Git
+      git:
+        uri: $REPO
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: Jenkinsfile
+kind: List
+metadata: []" | oc create -f -n ${GUID}-jenkins
 
 # Make sure that Jenkins is fully up and running before proceeding!
 while : ; do
@@ -41,3 +57,4 @@ while : ; do
   echo "...no. Sleeping 10 seconds."
   sleep 10
 done
+
