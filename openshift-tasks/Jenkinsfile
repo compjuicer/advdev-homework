@@ -38,10 +38,14 @@ podTemplate(
       def devTag  = "${version}-" + currentBuild.number
       def prodTag = "${version}"
 
-      def nexusUrl = "http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/${GUID}"
+      def devProject = "${GUID}-tasks-dev"
+      def prodProject = "${GUID}-tasks-prod"
 
-      def nexusRegistryUrl = "http://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/repository/releases/${GUID}"
-      //def nexusRegistryUrl = "https://nexus-registry-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/${GUID}"
+      def nexusUrl = "http://nexus3.gpte-hw-cicd.svc.cluster.local:8081"
+      //def nexusUrl = "http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com"
+
+      def nexusRegistryUrl = "http://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000"
+      //def nexusRegistryUrl = "https://nexus-registry-gpte-hw-cicd.apps.na311.openshift.opentlc.com"
 
       def sonarUrl = "http://sonarqube.gpte-hw-cicd.svc.cluster.local:9000"
       //def sonarUrl = "http://sonarqube-gpte-hw-cicd.apps.na311.openshift.opentlc.com"
@@ -76,7 +80,7 @@ podTemplate(
       stage('Publish to Nexus') {
         echo "Publish to Nexus"
 
-        sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::${nexusUrl}"
+        sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::${nexusUrl}/repository/releases/${GUID}"
       }
 
       // Build the OpenShift Image in OpenShift and tag it.
@@ -86,7 +90,7 @@ podTemplate(
         script {
           openshift.withCluster() {
             openshift.withProject("${devProject}") {
-              openshift.startBuild('tasks', "--from-file=${nexusUrl}/org/jboss/quickstarts/eap/tasks/${prodTag}/tasks-${prodTag}.war", "--wait=true")
+              openshift.startBuild('tasks', "--from-file=${nexusUrl}/repository/releases/${GUID}/org/jboss/quickstarts/eap/tasks/${prodTag}/tasks-${prodTag}.war", "--wait=true")
 
               openshift.tag("tasks:latest", "tasks:${devTag}")
             }
