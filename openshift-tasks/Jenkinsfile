@@ -38,8 +38,14 @@ podTemplate(
       def devTag  = "${version}-" + currentBuild.number
       def prodTag = "${version}"
 
-      def nexusUrl = "http://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/repository/releases/${GUID}"
-      //def nexusUrl = "http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/${GUID}"
+The public route for Nexus is http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com
+The Service for the Nexus Container Registry is https://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000.
+The public route for the Nexus Container Registry is https://nexus-registry-gpte-hw-cicd.apps.na311.openshift.opentlc.com
+
+      def nexusUrl = "http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/${GUID}"
+
+      def nexusRegistryUrl = "http://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/repository/releases/${GUID}"
+      //def nexusRegistryUrl = "https://nexus-registry-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/${GUID}"
 
       def sonarUrl = "http://sonarqube.gpte-hw-cicd.svc.cluster.local:9000"
       //def sonarUrl = "http://sonarqube-gpte-hw-cicd.apps.na311.openshift.opentlc.com"
@@ -52,20 +58,22 @@ podTemplate(
         sh "${mvnCmd} -DskipTests clean package"
       }
 
-      //parallel {
-        // Using Maven run the unit tests
-        stage('Unit Tests') {
-          echo "Running Unit Tests"
+      //stage("Run tests in parallel") {
+        //parallel {
+          // Using Maven run the unit tests
+          stage('Unit Tests') {
+            echo "Running Unit Tests"
 
-          sh "${mvnCmd} test"
-        }
+            sh "${mvnCmd} test"
+          }
 
-        // Using Maven to call SonarQube for Code Analysis
-        stage('Code Analysis') {
-          echo "Running Code Analysis"
+          // Using Maven to call SonarQube for Code Analysis
+          stage('Code Analysis') {
+            echo "Running Code Analysis"
 
-          sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
-        }
+            sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
+          }
+        //}
       //}
 
       // Publish the built war file to Nexus
@@ -82,7 +90,7 @@ podTemplate(
         script {
           openshift.withCluster() {
             openshift.withProject("${devProject}") {
-              openshift.startBuild('tasks', "--from-file=${nexusUrl}/repository/releases/${GUID}/org/jboss/quickstarts/eap/tasks/${prodTag}/tasks-${prodTag}.war", "--wait=true")
+              openshift.startBuild('tasks', "--from-file=${nexusUrl}/org/jboss/quickstarts/eap/tasks/${prodTag}/tasks-${prodTag}.war", "--wait=true")
 
               openshift.tag("tasks:latest", "tasks:${devTag}")
             }
