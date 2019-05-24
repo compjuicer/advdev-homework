@@ -45,7 +45,7 @@ items:
       jenkinsPipelineStrategy:
         jenkinsfilePath: Jenkinsfile
 kind: List
-metadata: []" | oc create -f -n ${GUID}-jenkins
+metadata: []" | oc create -f -
 
 # Make sure that Jenkins is fully up and running before proceeding!
 while : ; do
