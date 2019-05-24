@@ -38,10 +38,6 @@ podTemplate(
       def devTag  = "${version}-" + currentBuild.number
       def prodTag = "${version}"
 
-The public route for Nexus is http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com
-The Service for the Nexus Container Registry is https://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000.
-The public route for the Nexus Container Registry is https://nexus-registry-gpte-hw-cicd.apps.na311.openshift.opentlc.com
-
       def nexusUrl = "http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/${GUID}"
 
       def nexusRegistryUrl = "http://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/repository/releases/${GUID}"
