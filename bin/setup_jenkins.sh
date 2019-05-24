@@ -39,6 +39,7 @@ items:
       type: Git
       git:
         uri: $REPO
+      contextDir: openshift-tasks
     strategy:
       type: JenkinsPipeline
       jenkinsPipelineStrategy:
