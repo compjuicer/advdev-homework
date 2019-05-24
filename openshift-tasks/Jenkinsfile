@@ -9,7 +9,6 @@ podTemplate(
   containers: [
     containerTemplate(
       name: "jnlp",
-      //image: "image-registry.openshift-image-registry.svc:5000/${GUID}-jenkins/jenkins-agent-appdev",
       image: "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-agent-appdev",
       resourceRequestMemory: "1Gi",
       resourceLimitMemory: "2Gi",
@@ -39,7 +38,7 @@ podTemplate(
       def devTag  = "${version}-" + currentBuild.number
       def prodTag = "${version}"
 
-      def nexusUrl = "https://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/repository/releases/${GUID}"
+      def nexusUrl = "http://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/repository/releases/${GUID}"
       //def nexusUrl = "http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/${GUID}"
 
       def sonarUrl = "http://sonarqube.gpte-hw-cicd.svc.cluster.local:9000"
