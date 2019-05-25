@@ -55,11 +55,12 @@ podTemplate(
       stage('Build war') {
         echo "Building version ${devTag}"
 
-        sh "${mvnCmd} -DskipTests clean package"
+        sh "${mvnCmd} -DskipTests package"
+        //sh "${mvnCmd} -DskipTests clean package"
       }
 
-      stage("Run tests in parallel") {
-        parallel {
+      //stage("Run tests in parallel") {
+        //parallel {
           // Using Maven run the unit tests
           stage('Unit Tests') {
             echo "Running Unit Tests"
@@ -73,8 +74,8 @@ podTemplate(
 
             sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
           }
-        }
-      }
+        //}
+      //}
 
       // Publish the built war file to Nexus
       stage('Publish to Nexus') {
