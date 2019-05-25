@@ -51,32 +51,21 @@ podTemplate(
       stage("Build war") {
         echo "Building version ${devTag}"
 
-        sh "${mvnCmd} -DskipTests package"
-        //sh "${mvnCmd} -DskipTests clean package"
+        sh "${mvnCmd} -DskipTests clean package"
       }
 
-      stage("Parallel tests") {
-        parallel (
-          failFast: true,
+      // Using Maven run the unit tests
+      stage("Unit Tests") {
+          echo "Running Unit Tests"
 
-          // Using Maven run the unit tests
-          stage("Unit Tests") {
-            steps {
-              echo "Running Unit Tests"
+          sh "${mvnCmd} test"
+      },
 
-              sh "${mvnCmd} test"
-            }
-          },
+      // Using Maven to call SonarQube for Code Analysis
+      stage("Code Analysis") {
+          echo "Running Code Analysis"
 
-          // Using Maven to call SonarQube for Code Analysis
-          stage("Code Analysis") {
-            steps {
-              echo "Running Code Analysis"
-
-              sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
-            }
-          }
-        )
+          sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
       }
 
       // Publish the built war file to Nexus
