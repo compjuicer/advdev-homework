@@ -55,8 +55,8 @@ podTemplate(
         //sh "${mvnCmd} -DskipTests clean package"
       }
 
-      //stage("Run tests in parallel") {
-        //parallel {
+      stage("Run tests in parallel") {
+        parallel {
           // Using Maven run the unit tests
           stage("Unit Tests") {
             echo "Running Unit Tests"
@@ -70,8 +70,8 @@ podTemplate(
 
             sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
           }
-        //}
-      //}
+        }
+      }
 
       // Publish the built war file to Nexus
       stage("Publish to Nexus") {
@@ -144,10 +144,6 @@ podTemplate(
       def activeApp = ""
 
       stage("Blue/Green Production Deployment") {
-        // TBD: Determine which application is active
-        //      Set Image, Set VERSION
-        //      Deploy into the other application
-        //      Make sure the application is running and ready before proceeding
 
         script {
           openshift.withCluster() {
