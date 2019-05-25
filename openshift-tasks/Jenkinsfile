@@ -60,17 +60,21 @@ podTemplate(
           failFast: true,
 
           // Using Maven run the unit tests
-          "Unit Tests": stage("Unit Tests") {
-            echo "Running Unit Tests"
+          stage("Unit Tests") {
+            steps {
+              echo "Running Unit Tests"
 
-            sh "${mvnCmd} test"
+              sh "${mvnCmd} test"
+            }
           },
 
           // Using Maven to call SonarQube for Code Analysis
-          "Code Analysis": stage("Code Analysis") {
-            echo "Running Code Analysis"
+          stage("Code Analysis") {
+            steps {
+              echo "Running Code Analysis"
 
-            sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
+              sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
+            }
           }
         )
       }
