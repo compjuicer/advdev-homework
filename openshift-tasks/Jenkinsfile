@@ -131,8 +131,8 @@ podTemplate(
 
         script {
             openshift.withCluster() {
-                openshift.withProject("${prodProject}") {
-                    openshift.tag("tasks:${devTag}", "/tasks:${prodTag}")
+                openshift.withProject("${devProject}") {
+                    openshift.tag("tasks:${devTag}", "tasks:${prodTag}")
                 }
             }
         }
