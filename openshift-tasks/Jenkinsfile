@@ -41,16 +41,10 @@ podTemplate(
       def devProject = "${GUID}-tasks-dev"
       def prodProject = "${GUID}-tasks-prod"
 
-      def nexusUrl = "http://nexus3.gpte-hw-cicd.svc.cluster.local:8081"
-      //def nexusUrl = "http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com"
-
-      def nexusRegistryUrl = "nexus-registry.gpte-hw-cicd.svc.cluster.local:5000"
-      //def nexusRegistryUrl = "nexus-registry-gpte-hw-cicd.apps.na311.openshift.opentlc.com"
-
-      def openshiftRegistryUrl = "docker-registry.default.svc:5000"
-
       def sonarUrl = "http://sonarqube.gpte-hw-cicd.svc.cluster.local:9000"
-      //def sonarUrl = "http://sonarqube-gpte-hw-cicd.apps.na311.openshift.opentlc.com"
+      def nexusUrl = "http://nexus3.gpte-hw-cicd.svc.cluster.local:8081"
+      def nexusRegistryUrl = "nexus-registry.gpte-hw-cicd.svc.cluster.local:5000"
+      def openshiftRegistryUrl = "docker-registry.default.svc:5000"
 
       // Using Maven build the war file
       // Do not run tests in this step
@@ -110,6 +104,7 @@ podTemplate(
           openshift.withCluster() {
             openshift.withProject("${devProject}") {
               openshift.set("image", "dc/tasks", "tasks=${openshiftRegistryUrl}/${devProject}/tasks:${devTag}")
+
               openshift.set("env", "dc/tasks", "VERSION='${devTag} (tasks-dev)'")
 
               openshift.selector("dc", "tasks").rollout().latest();
@@ -153,11 +148,55 @@ podTemplate(
         //      Set Image, Set VERSION
         //      Deploy into the other application
         //      Make sure the application is running and ready before proceeding
+
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${prodProject}") {
+              activeApp = openshift.selector("route", "tasks").object().spec.to.name
+              
+              if (activeApp == "tasks-blue") {
+                destApp = "tasks-green"
+              }
+              else {
+                destApp = "tasks-blue"
+              }
+          
+              echo "Active: " + activeApp
+              echo "Target: " + destApp
+              
+              openshift.set("image", "dc/${destApp}", "tasks=${openshiftRegistryUrl}/${devProject}/tasks:${prodTag}")
+
+              openshift.set("env", "dc/${destApp}", "VERSION='${prodTag} ${destApp}'")
+              
+              openshift.selector("dc", "${destApp}").rollout().latest();
+              
+              def dc_prod = openshift.selector("dc", "${destApp}").object()
+              def dc_version = dc_prod.status.latestVersion
+              def rc_prod = openshift.selector("rc", "${destApp}-${dc_version}").object()
+
+              echo "Waiting for ${destApp} to be ready"
+
+              while (rc_prod.spec.replicas != rc_prod.status.readyReplicas) {
+                sleep 5
+                rc_prod = openshift.selector("rc", "${destApp}-${dc_version}").object()
+              }
+            }
+          }
+        }
       }
 
       stage("Switch over to new Version") {
         echo "Switching Production application to ${destApp}."
-        // TBD: Execute switch
+
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${prodProject}") {
+              def route = openshift.selector("route/tasks").object()
+              route.spec.to.name="${destApp}"
+              openshift.apply(route)
+            }
+          }
+        }
       }
     }
   }
