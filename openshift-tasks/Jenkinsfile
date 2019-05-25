@@ -164,7 +164,7 @@ podTemplate(
               echo "Active: " + activeApp
               echo "Target: " + destApp
               
-              openshift.set("image", "dc/${destApp}", "tasks=${openshiftRegistryUrl}/${devProject}/tasks:${prodTag}")
+              openshift.set("image", "dc/${destApp}", "${destApp}=${openshiftRegistryUrl}/${devProject}/tasks:${prodTag}")
 
               openshift.set("env", "dc/${destApp}", "VERSION='${prodTag} ${destApp}'")
               
