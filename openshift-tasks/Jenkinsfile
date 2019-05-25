@@ -57,6 +57,8 @@ podTemplate(
 
       stage("Parallel tests") {
         parallel (
+          failFast: true,
+
           // Using Maven run the unit tests
           "Unit Tests": stage("Unit Tests") {
             echo "Running Unit Tests"
