@@ -24,6 +24,7 @@ oc set volume dc/tasks --add --name=jboss-config --mount-path=/opt/eap/standalon
 oc set volume dc/tasks --add --name=jboss-config1 --mount-path=/opt/eap/standalone/configuration/application-roles.properties --sub-path=application-roles.properties --configmap-name=tasks-config -n ${GUID}-tasks-dev
 oc set probe dc/tasks --readiness --get-url=http://:8080/ --initial-delay-seconds=120 --timeout-seconds=1 -n ${GUID}-tasks-dev
 oc set probe dc/tasks --liveness --get-url=http://:8080/ --initial-delay-seconds=120 --timeout-seconds=1 -n ${GUID}-tasks-dev
+oc set resources dc/tasks -n ${GUID}-tasks-dev --limits=memory=2Gi,cpu=2 --requests=memory=1Gi,cpu=1
 
 # Setting 'wrong' VERSION. This will need to be updated in the pipeline
 oc set env dc/tasks VERSION='0.0 (tsks-dev)' -n ${GUID}-tasks-dev

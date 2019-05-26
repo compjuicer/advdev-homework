@@ -47,6 +47,8 @@ items:
 kind: List
 metadata: []" | oc create -n ${GUID}-jenkins -f -
 
+oc set resources dc/jenkins -n ${GUID}-jenkins --limits=memory=2Gi,cpu=2 --requests=memory=2Gi,cpu=1
+
 # Make sure that Jenkins is fully up and running before proceeding!
 while : ; do
   echo "Checking if Jenkins is Ready..."
