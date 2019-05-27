@@ -46,7 +46,7 @@ items:
         jenkinsfilePath: Jenkinsfile
         env:
           - name: GUID
-            value: ${GUID}
+            value: '${GUID}'
 kind: List
 metadata: []" | oc create -n ${GUID}-jenkins -f -
 
