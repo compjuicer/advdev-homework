@@ -1,7 +1,5 @@
 #!groovy
 
-def GUID="2043"
-
 podTemplate(
   label: "skopeo-pod",
   cloud: "openshift",
@@ -54,18 +52,22 @@ podTemplate(
         sh "${mvnCmd} -DskipTests clean package"
       }
 
-      // Using Maven run the unit tests
-      stage("Unit Tests") {
-        echo "Running Unit Tests"
+      stage("Unit tests and Sonar in parallel") {
+        parallel (
+          // Using Maven run the unit tests
+          "Unit Tests": {
+            echo "Running Unit Tests"
 
-        sh "${mvnCmd} test"
-      }
+            sh "${mvnCmd} test"
+          },
 
-      // Using Maven to call SonarQube for Code Analysis
-      stage("Code Analysis") {
-        echo "Running Code Analysis"
+          // Using Maven to call SonarQube for Code Analysis
+          "Code Analysis": {
+            echo "Running Code Analysis"
 
-        sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
+            sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonarUrl}"
+          }
+        )
       }
 
       // Publish the built war file to Nexus
